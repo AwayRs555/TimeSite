@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horloge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        body.light {
+            background-color: #f5f5f5;
+            color: black;
+        }
+
+        .clock-container {
+            position: absolute;
+            top: 75px; /* Distance depuis le haut */
+            left: 400px; /* Distance depuis la gauche */
+            width: 1000px; /* Augmentez la largeur */
+            height: 250px; /* Réduisez la hauteur pour un effet "allongé" */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: background-color 0.5s, box-shadow 0.5s;
+        }
+
+        .stopwatch-container {
+            position: absolute;
+            top: 340px; /* Distance depuis le haut */
+            left: 460px; /* Distance depuis la gauche */
+            width: 400px; /* La moitié de la largeur de .clock-container */
+            height: 250px; /* La moitié de la hauteur de .clock-container */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 30px; /* Espacement entre les deux boxes */
+            transition: background-color 0.5s, box-shadow 0.5s;
+        }
+
+        /* Titre "Chronomètre" */
+        #stopwatchTitle {
+            font-size: 2.5rem; /* Taille du texte */
+            color: white; /* Couleur du texte */
+            margin-bottom: 5px; /* Espace entre le titre et le chronomètre */
+            margin-top: 10px; /* Espace entre le conteneur et le tire */
+        }
+
+        /* Style pour l'affichage du chronomètre */
+        #stopwatchDisplay {
+            font-size: 3rem; /* Taille du texte du chronomètre */
+            font-weight: bold; /* Mettre en gras */
+            color: white; /* Couleur du texte */
+            margin: 20px 0; /* Espacement vertical */
+        }
+
+        .alarm-container {
+            position: absolute;
+            top: 350px; /* Distance depuis le haut */
+            right: 520px; /* Distance depuis la gauche */
+            width: 370px;
+            height: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 20px;
+            transition: background-color 0.5s, box-shadow 0.5s;
+        }
+
+        .alarm-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .alarm-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            }
+
+        .alarm-title {
+            position: absolute;
+            top: 20px; /* Distance depuis le haut */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem; /* Taille de la police */
+            color: white; /* Couleur du texte */
+            margin: 0; /* Supprime les marges */
+            text-align: center; /* Centre le texte si plusieurs lignes */
+        }  
+
+        #progressCircle {
+            display: block;
+            margin: 0 auto;
+        }
+
+        #progressCircle circle {
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        #alarmRemainingTime {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem; /* Ajustez cette valeur pour agrandir le texte */
+            color: white;
+            font-weight: bold;
+        }
+
+
+
+        @keyframes progress {
+            0% {
+                stroke-dasharray: 0 100;
+            }
+            100% {
+                stroke-dasharray: 100 0;
+            }
+        }
+
+        .alarm-settings {
+            position: absolute;
+            top: 720px; /* Distance depuis le haut */
+            right: 515px; /* Distance depuis la gauche */
+            margin-top: 20px;
+            padding: 15px;
+            width: 390px;
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            text-align: center;
+            transition: background-color 0.5s, box-shadow 0.5s;
+        }
+
+        .alarm-settings input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        body.light .clock-container {
+            background-color: #f5f5f5;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .clock {
+            font-size: 9rem;
+            animation: fadeIn 1s ease-in-out;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .clock span {
+            display: inline-block;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .clock span:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .alarm, .stopwatch {
+            margin-top: 20px;
+        }
+
+        /* Style global pour tous les boutons */
+    button {
+        background: linear-gradient(145deg, #1e1e1e, #252525); /* Dégradé pour effet 3D */
+        color: white; /* Couleur du texte */
+        border: none; /* Pas de bordure */
+        padding: 10px 20px; /* Espacement intérieur */
+        font-size: 1rem; /* Taille de la police */
+        border-radius: 5px; /* Coins arrondis */
+        cursor: pointer; /* Curseur cliquable */
+        transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animation fluide */
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5), -5px -5px 10px rgba(50, 50, 50, 0.2); /* Ombres pour effet 3D */
+    }
+
+    /* Effet au survol */
+    button:hover {
+        background: linear-gradient(145deg, #252525, #1e1e1e); /* Inverser les couleurs pour plus de contraste */
+        transform: translateY(-3px); /* Léger déplacement vers le haut */
+        box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.6), -6px -6px 12px rgba(50, 50, 50, 0.3); /* Ombres plus intenses */
+    }
+
+    /* Effet au clic */
+    button:active {
+        background: linear-gradient(145deg, #181818, #101010); /* Couleur plus sombre */
+        transform: translateY(2px); /* Déplacement vers le bas */
+        box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.5), inset -3px -3px 6px rgba(50, 50, 50, 0.2); /* Ombres internes pour effet enfoncé */
+    }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <label class="toggle-switch">
+            <input type="checkbox" onchange="toggleTheme()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="clock-container">
+        <div class="clock" id="clock"></div>
+    </div>
+
+    <div class="stopwatch-container">
+        <h2 id="stopwatchTitle">Chronomètre</h2>
+        <span id="stopwatchDisplay">00:00:00.000</span> <!-- Affichage avec millisecondes -->
+        <div class="stopwatch-controls">
+            <button onclick="startStopwatch()">Démarrer</button>
+            <button onclick="pauseStopwatch()">Pause</button>
+            <button onclick="resetStopwatch()">Réinitialiser</button>
+        </div>
+    </div>
+    <div class="alarm">
+        <div class="alarm-container">
+            <h3 class="alarm-title">Décompte</h3>
+            <div class="circle" id="alarmCircle">
+                <!-- Cercle animé avec SVG -->
+                <svg id="progressCircle" width="200" height="200">
+                    <circle
+                        cx="100"
+                        cy="100"
+                        r="95"
+                        stroke="white"
+                        stroke-width="6"
+                        fill="none"
+                    ></circle>
+                </svg>
+    
+                <!-- Temps restant -->
+                <span id="alarmRemainingTime">00:00</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alarm-settings">
+        <div class="button" id="button"></div>
+        <input type="number" id="alarmDelay" placeholder="Temps en minutes" min="1">
+        <button class="button" onclick="setAlarmDelay()">Définir un décompte</button>
+    </div>
+        <p id="alarmStatus"></p>
+    </div>
+    
+    
+    
+
+    <script>
+            function updateClock() {
+        const clockElement = document.getElementById("clock");
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+
+        clockElement.innerHTML = `
+            <span>${hours}</span>:<span>${minutes}</span>:<span>${seconds}</span>.<span>${milliseconds}</span>
+        `;
+
+            requestAnimationFrame(updateClock); // Utiliser requestAnimationFrame pour une animation fluide
+        }
+
+      // Alarm
+        let alarmAnimationFrame;
+
+        function setAlarmDelay() {
+            const delayInput = document.getElementById("alarmDelay").value;
+            
+            // Validation de l'entrée utilisateur
+            if (!delayInput || delayInput <= 0) {
+                alert("Veuillez entrer un délai valide (en minutes).");
+                return;
+            }
+
+            const delay = parseInt(delayInput, 10) * 60 * 1000; // Convertir minutes en millisecondes
+            const circleElement = document.querySelector("#progressCircle circle");
+            const remainingTimeElement = document.getElementById("alarmRemainingTime");
+
+            // Réinitialiser l'animation et le cercle
+            const totalLength = circleElement.getTotalLength();
+            circleElement.style.strokeDasharray = totalLength;
+            circleElement.style.strokeDashoffset = totalLength;
+
+            remainingTimeElement.textContent = formatTime(delay / 1000);
+
+            // Variables pour l'animation
+            const startTime = Date.now();
+            const endTime = startTime + delay;
+
+            // Annuler toute animation en cours
+            if (alarmAnimationFrame) {
+                cancelAnimationFrame(alarmAnimationFrame);
+            }
+
+            // Fonction d'animation fluide
+            function animate() {
+                const now = Date.now();
+                const timeLeft = Math.max(endTime - now, 0);
+
+                // Mettre à jour le temps restant
+                remainingTimeElement.textContent = formatTime(timeLeft / 1000);
+
+                // Mettre à jour l'animation du cercle
+                const progress = (timeLeft / delay) * totalLength;
+                circleElement.style.strokeDashoffset = progress;
+
+                // Si le temps est écoulé, terminer l'animation
+                if (timeLeft <= 0) {
+                    alert("Alarme !");
+                    circleElement.style.strokeDashoffset = 0; // Cercle rempli
+                    return;
+                }
+
+                // Continuer l'animation
+                alarmAnimationFrame = requestAnimationFrame(animate);
+            }
+
+            // Lancer l'animation
+            animate();
+        }
+
+        // Fonction pour formater le temps en MM:SS
+        function formatTime(seconds) {
+            const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+            const secs = String(Math.floor(seconds % 60)).padStart(2, "0");
+            return `${minutes}:${secs}`;
+        }
+
+
+
+
+        let stopwatchInterval; // Variable pour l'intervalle
+        let elapsedTime = 0; // Temps écoulé en millisecondes
+        let running = false; // Indicateur d'état du chronomètre
+
+        // Fonction pour démarrer le chronomètre
+        function startStopwatch() {
+            if (running) return; // Empêcher plusieurs démarrages
+            running = true;
+
+            const startTime = Date.now() - elapsedTime; // Commencer à partir du temps écoulé
+            stopwatchInterval = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                updateStopwatchDisplay(elapsedTime);
+            }, 10); // Mettre à jour toutes les 10ms pour inclure les millisecondes
+        }
+
+        // Fonction pour mettre en pause le chronomètre
+        function pauseStopwatch() {
+            if (!running) return; // Si déjà en pause, ne rien faire
+            running = false;
+            clearInterval(stopwatchInterval); // Arrête l'intervalle
+        }
+
+        // Fonction pour réinitialiser le chronomètre
+        function resetStopwatch() {
+            running = false;
+            clearInterval(stopwatchInterval); // Arrête l'intervalle
+            elapsedTime = 0; // Réinitialise le temps
+            updateStopwatchDisplay(elapsedTime); // Met à jour l'affichage
+        }
+
+        // Fonction pour mettre à jour l'affichage
+        function updateStopwatchDisplay(time) {
+            const hours = String(Math.floor(time / (1000 * 60 * 60))).padStart(2, "0");
+            const minutes = String(Math.floor((time % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0");
+            const seconds = String(Math.floor((time % (1000 * 60)) / 1000)).padStart(2, "0");
+            const milliseconds = String(Math.floor(time % 1000)).padStart(3, "0");
+
+            document.getElementById("stopwatchDisplay").textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+        }
+
+
+
+                // Initialisation
+                function init() {
+            updateClock(); // Appel initial
+            loadWeatherEvents(); // Charger les données météo
+        }
+
+
+        // Lance l'initialisation au chargement de la page
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+
+</body>
+</html>
+
